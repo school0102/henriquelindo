@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Hugo's Arcade Lab</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#08071a">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial,Helvetica,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#08071a;color:white}
+body{background:radial-gradient(circle at 12% 8%,#ffb70344,transparent 30%),radial-gradient(circle at 90% 20%,#00e5ff44,transparent 34%),linear-gradient(145deg,#08071a,#10152f 52%,#071b2e)}
+button{font-family:inherit;color:inherit}
+
+#homeScreen{width:100%;height:100%;overflow-y:auto;scrollbar-width:none}
+#homeScreen::-webkit-scrollbar{display:none}
+
+.hero{padding:24px 18px 18px;background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03));border-bottom:1px solid rgba(255,255,255,.10);position:relative;overflow:hidden}
+.hero:before{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-60px;top:-60px;background:#00e5ff22;filter:blur(8px)}
+.badge{position:relative;width:max-content;padding:7px 12px;border-radius:999px;background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.15);font-size:12px;font-weight:950;color:#b9f8ff}
+.hero h1{position:relative;margin-top:14px;font-size:35px;line-height:35px;font-weight:950;letter-spacing:-1.2px}
+.hero h1 span{color:#ffd166}
+.hero p{position:relative;margin-top:10px;max-width:335px;color:#d7e3ff;font-size:13px;line-height:19px}
+.topChips{display:flex;gap:8px;margin-top:15px;overflow-x:auto;scrollbar-width:none}
+.topChips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;padding:9px 11px;border-radius:15px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.10);font-size:11px;font-weight:950;color:#f8fbff}
+
+.games{display:grid;grid-template-columns:1fr;gap:16px;padding:17px;max-width:560px;margin:0 auto 24px}
+.gameCard{position:relative;min-height:190px;border:none;border-radius:28px;text-align:left;overflow:hidden;padding:18px;background:#111;color:white;box-shadow:0 22px 48px rgba(0,0,0,.42),inset 0 1px 0 rgba(255,255,255,.10);cursor:pointer}
+.gameCard:active{transform:scale(.985)}
+.gameCard:before{content:"";position:absolute;inset:0}
+.gameCard:nth-child(1):before{background:radial-gradient(circle at 15% 15%,#fff36b55,transparent 28%),linear-gradient(135deg,#f97316,#be123c 62%,#5b1234)}
+.gameCard:nth-child(2):before{background:radial-gradient(circle at 85% 15%,#70f7ff55,transparent 30%),linear-gradient(135deg,#111b59,#0891b2 65%,#064e3b)}
+.gameCard:nth-child(3):before{background:radial-gradient(circle at 20% 15%,#ffffff55,transparent 26%),linear-gradient(135deg,#521b8f,#db2777 70%,#7f1d1d)}
+.gameCard>*{position:relative;z-index:1}
+.iconBox{width:58px;height:58px;border-radius:22px;background:rgba(0,0,0,.26);border:1px solid rgba(255,255,255,.17);display:flex;align-items:center;justify-content:center;font-size:30px;backdrop-filter:blur(12px)}
+.gameCard h2{margin-top:18px;font-size:25px;line-height:26px;font-weight:950;letter-spacing:-.7px}
+.gameCard p{margin-top:8px;color:#fff;font-size:13px;line-height:19px;opacity:.92;max-width:310px}
+.tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px;padding-right:58px}
+.tags span{font-size:11px;font-weight:950;padding:6px 9px;border-radius:999px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.14)}
+.play{position:absolute;right:16px;bottom:16px;width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.20);border:1px solid rgba(255,255,255,.22);backdrop-filter:blur(12px);font-size:24px}
+.footer{padding:18px;text-align:center;color:#9fb1d0;font-size:12px}
+
+#gameLayer{display:none;position:fixed;inset:0;background:#07101d;z-index:99999;overflow:hidden}
+.gameScreen{display:none;position:absolute;inset:0;overflow:hidden;touch-action:none}
+#gameTop{position:absolute;left:0;right:0;top:0;height:72px;z-index:60;display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(180deg,rgba(0,0,0,.62),transparent)}
+#gameTitle{padding:10px 13px;border-radius:999px;background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.13);backdrop-filter:blur(14px);font-size:13px;font-weight:950}
+#exitBtn{height:42px;padding:0 14px;border:none;border-radius:999px;background:rgba(0,0,0,.48);border:1px solid rgba(255,255,255,.13);font-size:13px;font-weight:950;backdrop-filter:blur(14px)}
+#exitBtn.confirm{background:#b91c1c;box-shadow:0 0 22px rgba(239,68,68,.55)}
+.hud{position:absolute;top:76px;left:13px;right:13px;z-index:40;display:flex;justify-content:space-between;gap:9px}
+.hudBox{padding:9px 11px;border-radius:14px;background:rgba(0,0,0,.42);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(12px);font-size:12px;font-weight:950}
+.centerMsg{position:absolute;z-index:80;left:50%;top:50%;transform:translate(-50%,-50%);width:min(86vw,340px);padding:20px;border-radius:26px;text-align:center;background:rgba(0,0,0,.62);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(16px);box-shadow:0 20px 60px rgba(0,0,0,.45)}
+.centerMsg h2{font-size:25px;margin-bottom:8px}
+.centerMsg p{font-size:13px;line-height:19px;color:#dbeafe}
+.startBtn{margin-top:16px;width:100%;height:49px;border:none;border-radius:18px;background:linear-gradient(135deg,#ffd166,#59f2ff);color:#111;font-size:15px;font-weight:950}
+
+#broomGame{background:linear-gradient(180deg,#66d8ff 0%,#d8fbff 50%,#84cc16 51%,#3f8f2f 100%)}
+.zone{position:absolute;z-index:2;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.035)}
+.zone span{position:absolute;color:rgba(0,0,0,.34);font-size:24px;font-weight:950}
+#zLeft{left:0;top:0;width:38%;height:100%}#zLeft span{left:22px;top:50%}
+#zRight{right:0;top:0;width:38%;height:100%}#zRight span{right:22px;top:50%}
+#zUp{left:38%;top:0;width:24%;height:40%}#zUp span{left:45%;top:24px}
+#zDown{left:38%;bottom:0;width:24%;height:40%}#zDown span{left:45%;bottom:24px}
+.person{position:absolute;left:50%;bottom:19%;transform:translateX(-50%);width:78px;height:138px;z-index:5}
+.head{position:absolute;left:24px;top:0;width:32px;height:32px;border-radius:50%;background:#ffd7a8;border:3px solid #111}
+.body{position:absolute;left:30px;top:31px;width:20px;height:54px;border-radius:12px;background:linear-gradient(180deg,#2563eb,#1e40af)}
+.arm{position:absolute;left:37px;top:46px;width:12px;height:78px;border-radius:12px;background:#ffd7a8;transform-origin:top center;transform:rotate(-12deg)}
+.leg1,.leg2{position:absolute;top:84px;width:14px;height:58px;border-radius:10px;background:#151515}
+.leg1{left:26px;transform:rotate(8deg)}.leg2{left:42px;transform:rotate(-8deg)}
+#broom{position:absolute;left:50%;bottom:34%;width:10px;height:192px;border-radius:999px;background:#95591f;transform-origin:50% 92%;z-index:7;box-shadow:0 0 0 2px rgba(0,0,0,.16)}
+#broom:before{content:"";position:absolute;left:-18px;top:-20px;width:46px;height:36px;border-radius:50% 50% 14px 14px;background:#d9a447;box-shadow:inset 0 -9px 0 #aa6426}
+#broomHint{position:absolute;left:10px;right:10px;bottom:9px;text-align:center;color:rgba(0,0,0,.56);font-size:12px;font-weight:950;z-index:9}
+
+#rushGame{background:linear-gradient(180deg,#0f172a,#111827)}
+.road{position:absolute;left:50%;top:0;bottom:0;width:76%;transform:translateX(-50%);background:linear-gradient(90deg,#1f2937,#4b5563,#1f2937);border-left:5px solid #fde047;border-right:5px solid #fde047}
+.lane{position:absolute;left:50%;width:6px;height:70px;background:rgba(255,255,255,.55);border-radius:999px;transform:translateX(-50%)}
+#car{position:absolute;bottom:58px;left:50%;width:56px;height:88px;border-radius:18px 18px 12px 12px;background:linear-gradient(180deg,#22d3ee,#2563eb);transform:translateX(-50%);z-index:8;box-shadow:0 10px 0 #07111f}
+#car:before{content:"";position:absolute;left:11px;right:11px;top:12px;height:24px;border-radius:10px;background:#dff8ff}
+.obstacle{position:absolute;width:56px;height:56px;border-radius:16px;background:linear-gradient(135deg,#fb923c,#dc2626);box-shadow:0 8px 0 #7f1d1d;z-index:6}
+
+#bubbleGame{background:radial-gradient(circle at center,#3b1e70,#12091f)}
+.bubble{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:950;color:white;background:radial-gradient(circle at 30% 25%,#fff8,#ffffff22 22%,#06b6d4 60%,#075985);box-shadow:inset -8px -10px 16px rgba(0,0,0,.18),0 0 25px rgba(34,211,238,.35);z-index:8}
+.badBubble{background:radial-gradient(circle at 30% 25%,#fff8,#ffffff22 22%,#fb7185 60%,#9f1239)}
+@media(min-width:720px){.games{grid-template-columns:repeat(2,1fr);max-width:980px}.gameCard{min-height:220px}}
+</style>
+</head>
+<body>
+<div id="homeScreen">
+  <section class="hero">
+    <div class="badge">⚡ TRICKTRACK LAB</div>
+    <h1>Mini Jogos <span>de Bolso</span></h1>
+    <p>Três jogos feitos do zero para celular, com partidas rápidas, tela cheia e controles por toque.</p>
+    <div class="topChips"><div class="chip">📱 Mobile first</div><div class="chip">🎮 3 jogos próprios</div><div class="chip">🧩 Sem iframe</div></div>
+  </section>
+
+  <main class="games">
+    <button class="gameCard" onclick="openGame('broom')">
+      <div class="iconBox">🧹</div>
+      <h2>Vassoura Ninja</h2>
+      <p>Equilibre uma vassoura na mão. Toque nas direções da tela para impedir que ela caia.</p>
+      <div class="tags"><span>Equilíbrio</span><span>Reflexo</span><span>Direções</span></div>
+      <div class="play">▶</div>
+    </button>
+    <button class="gameCard" onclick="openGame('rush')">
+      <div class="iconBox">🚗</div>
+      <h2>Rua Neon</h2>
+      <p>Arraste o carro pelo asfalto, desvie dos blocos vermelhos e aguente a velocidade aumentando.</p>
+      <div class="tags"><span>Arrastar</span><span>Corrida</span><span>Score</span></div>
+      <div class="play">▶</div>
+    </button>
+    <button class="gameCard" onclick="openGame('bubble')">
+      <div class="iconBox">🫧</div>
+      <h2>Bolha Relâmpago</h2>
+      <p>Estoure bolhas azuis antes do tempo acabar. Fuja das bolhas vermelhas para não perder pontos.</p>
+      <div class="tags"><span>Toque</span><span>Precisão</span><span>Timer</span></div>
+      <div class="play">▶</div>
+    </button>
+  </main>
+  <div class="footer">2026 Hugo • TrickTrack Lab</div>
+</div>
+
+<div id="gameLayer">
+  <div id="gameTop"><div id="gameTitle">Jogo</div><button id="exitBtn" onclick="exitGame()">🚪 Sair</button></div>
+
+  <section id="broomGame" class="gameScreen">
+    <div class="hud"><div class="hudBox" id="broomScore">Tempo: 0</div><div class="hudBox" id="broomAngle">Inclinação: 0</div></div>
+    <div id="zLeft" class="zone" onclick="broomTap('left')"><span>←</span></div>
+    <div id="zRight" class="zone" onclick="broomTap('right')"><span>→</span></div>
+    <div id="zUp" class="zone" onclick="broomTap('up')"><span>↑</span></div>
+    <div id="zDown" class="zone" onclick="broomTap('down')"><span>↓</span></div>
+    <div class="person"><div class="head"></div><div class="body"></div><div class="arm"></div><div class="leg1"></div><div class="leg2"></div></div>
+    <div id="broom"></div>
+    <div id="broomHint">Toque no lado contrário da queda. Cima/baixo estabiliza.</div>
+    <div id="broomStart" class="centerMsg"><h2>🧹 Vassoura Ninja</h2><p>Segure a vassoura em pé. Se inclinar demais, acabou.</p><button class="startBtn" onclick="startBroom()">Começar</button></div>
+  </section>
+
+  <section id="rushGame" class="gameScreen">
+    <div class="road"><div class="lane" id="lane1"></div><div class="lane" id="lane2"></div><div class="lane" id="lane3"></div></div>
+    <div class="hud"><div class="hudBox" id="rushScore">Pontos: 0</div><div class="hudBox" id="rushSpeed">Vel: 1x</div></div>
+    <div id="car"></div>
+    <div id="rushStart" class="centerMsg"><h2>🚗 Rua Neon</h2><p>Arraste na tela para mover o carro e desviar dos blocos.</p><button class="startBtn" onclick="startRush()">Começar</button></div>
+  </section>
+
+  <section id="bubbleGame" class="gameScreen">
+    <div class="hud"><div class="hudBox" id="bubbleScore">Pontos: 0</div><div class="hudBox" id="bubbleTime">Tempo: 30</div></div>
+    <div id="bubbleStart" class="centerMsg"><h2>🫧 Bolha Relâmpago</h2><p>Toque nas bolhas azuis. Vermelhas tiram pontos.</p><button class="startBtn" onclick="startBubble()">Começar</button></div>
+  </section>
+</div>
+
+<script>
+let exitConfirm=false,exitTimer=null,loops=[];
+function addLoop(fn,t){const id=setInterval(fn,t);loops.push(id);return id}
+function stopLoops(){loops.forEach(clearInterval);loops=[];document.querySelectorAll(".obstacle,.bubble").forEach(e=>e.remove())}
+
+function openGame(game){
+  stopLoops(); exitConfirm=false; clearTimeout(exitTimer);
+  document.getElementById("exitBtn").classList.remove("confirm");
+  document.getElementById("exitBtn").textContent="🚪 Sair";
+  document.getElementById("homeScreen").style.display="none";
+  document.getElementById("gameLayer").style.display="block";
+  document.querySelectorAll(".gameScreen").forEach(s=>s.style.display="none");
+  if(game==="broom"){document.getElementById("gameTitle").textContent="🧹 Vassoura Ninja";document.getElementById("broomGame").style.display="block";document.getElementById("broomStart").style.display="block"}
+  if(game==="rush"){document.getElementById("gameTitle").textContent="🚗 Rua Neon";document.getElementById("rushGame").style.display="block";document.getElementById("rushStart").style.display="block"}
+  if(game==="bubble"){document.getElementById("gameTitle").textContent="🫧 Bolha Relâmpago";document.getElementById("bubbleGame").style.display="block";document.getElementById("bubbleStart").style.display="block"}
+}
+function exitGame(){
+  const b=document.getElementById("exitBtn");
+  if(!exitConfirm){exitConfirm=true;b.classList.add("confirm");b.textContent="Voltar?";clearTimeout(exitTimer);exitTimer=setTimeout(()=>{exitConfirm=false;b.classList.remove("confirm");b.textContent="🚪 Sair"},2200);return}
+  stopLoops();document.getElementById("gameLayer").style.display="none";document.getElementById("homeScreen").style.display="block";b.classList.remove("confirm");b.textContent="🚪 Sair"
+}
+
+let broomAngle=0,broomVel=0,broomScore=0,broomRunning=false;
+function startBroom(){
+  document.getElementById("broomStart").style.display="none";
+  broomAngle=(Math.random()-.5)*8;broomVel=0;broomScore=0;broomRunning=true;
+  addLoop(()=>{
+    if(!broomRunning)return;
+    broomVel+=(broomAngle>0?.045:-.045)+(Math.random()-.5)*.18;
+    broomAngle+=broomVel;
+    document.getElementById("broom").style.transform=`translateX(-50%) rotate(${broomAngle}deg)`;
+    document.getElementById("broomScore").textContent="Tempo: "+Math.floor(broomScore/10);
+    document.getElementById("broomAngle").textContent="Inclinação: "+Math.round(broomAngle);
+    broomScore++;
+    if(Math.abs(broomAngle)>46){broomRunning=false;stopLoops();document.getElementById("broomStart").innerHTML=`<h2>💥 Caiu!</h2><p>Você segurou por ${Math.floor(broomScore/10)} segundos.</p><button class="startBtn" onclick="startBroom()">Tentar de novo</button>`;document.getElementById("broomStart").style.display="block"}
+  },50)
+}
+function broomTap(dir){
+  if(!broomRunning)return;
+  if(dir==="left")broomVel-=1.25;
+  if(dir==="right")broomVel+=1.25;
+  if(dir==="up")broomVel*=.55;
+  if(dir==="down"){broomVel*=.85;broomAngle*=.92}
+}
+
+let rushScore=0,carX=50,rushSpeed=1,rushRunning=false;
+function startRush(){
+  document.getElementById("rushStart").style.display="none";
+  document.querySelectorAll(".obstacle").forEach(e=>e.remove());
+  rushScore=0;carX=50;rushSpeed=1;rushRunning=true;
+  const car=document.getElementById("car"),rush=document.getElementById("rushGame");
+  car.style.left=carX+"%";
+  rush.ontouchmove=e=>{if(!rushRunning)return;const x=e.touches[0].clientX/window.innerWidth*100;carX=Math.max(15,Math.min(85,x));car.style.left=carX+"%"};
+  rush.onmousemove=e=>{if(!rushRunning)return;const x=e.clientX/window.innerWidth*100;carX=Math.max(15,Math.min(85,x));car.style.left=carX+"%"};
+  addLoop(()=>{if(!rushRunning)return;rushScore++;rushSpeed=1+rushScore/650;document.getElementById("rushScore").textContent="Pontos: "+rushScore;document.getElementById("rushSpeed").textContent="Vel: "+rushSpeed.toFixed(1)+"x";document.querySelectorAll(".lane").forEach((l,i)=>l.style.top=((rushScore*6+i*170)%window.innerHeight)+"px")},40);
+  addLoop(()=>spawnObstacle(),760)
+}
+function spawnObstacle(){
+  if(!rushRunning)return;
+  const rush=document.getElementById("rushGame"),o=document.createElement("div");
+  o.className="obstacle";o.style.left=(18+Math.random()*64)+"%";o.style.top="-70px";rush.appendChild(o);
+  let y=-70;
+  const fall=setInterval(()=>{
+    if(!rushRunning){clearInterval(fall);o.remove();return}
+    y+=5*rushSpeed;o.style.top=y+"px";
+    const ox=parseFloat(o.style.left);
+    if(y>window.innerHeight-155&&y<window.innerHeight-55&&Math.abs(ox-carX)<11){rushRunning=false;clearInterval(fall);stopLoops();document.getElementById("rushStart").innerHTML=`<h2>💥 Batida!</h2><p>Sua pontuação foi ${rushScore}.</p><button class="startBtn" onclick="startRush()">Jogar de novo</button>`;document.getElementById("rushStart").style.display="block"}
+    if(y>window.innerHeight+80){clearInterval(fall);o.remove()}
+  },30)
+}
+
+let bubbleScore=0,bubbleTime=30,bubbleRunning=false;
+function startBubble(){
+  document.getElementById("bubbleStart").style.display="none";
+  document.querySelectorAll(".bubble").forEach(e=>e.remove());
+  bubbleScore=0;bubbleTime=30;bubbleRunning=true;
+  document.getElementById("bubbleScore").textContent="Pontos: 0";document.getElementById("bubbleTime").textContent="Tempo: 30";
+  addLoop(()=>{if(!bubbleRunning)return;bubbleTime--;document.getElementById("bubbleTime").textContent="Tempo: "+bubbleTime;if(bubbleTime<=0){bubbleRunning=false;stopLoops();document.getElementById("bubbleStart").innerHTML=`<h2>⏱ Acabou!</h2><p>Você fez ${bubbleScore} pontos.</p><button class="startBtn" onclick="startBubble()">Jogar de novo</button>`;document.getElementById("bubbleStart").style.display="block"}},1000);
+  addLoop(()=>spawnBubble(),520)
+}
+function spawnBubble(){
+  if(!bubbleRunning)return;
+  const area=document.getElementById("bubbleGame"),b=document.createElement("div"),bad=Math.random()<.22,size=44+Math.random()*34;
+  b.className="bubble"+(bad?" badBubble":"");b.style.width=size+"px";b.style.height=size+"px";b.style.left=(8+Math.random()*78)+"%";b.style.top=(18+Math.random()*68)+"%";b.textContent=bad?"×":"+";
+  b.onclick=()=>{if(!bubbleRunning)return;bubbleScore+=bad?-3:1;if(bubbleScore<0)bubbleScore=0;document.getElementById("bubbleScore").textContent="Pontos: "+bubbleScore;b.remove()};
+  area.appendChild(b);setTimeout(()=>b.remove(),1400)
+}
+</script>
+</body>
+</html>
